@@ -1,0 +1,51 @@
+---
+- hosts: gpu_nodes
+  become: true
+  tasks:
+    - name: Install NVIDIA drivers
+      script: ../../scripts/install-nvidia-drivers.sh
+
+    - name: Configure containerd for NVIDIA
+      script: ../../scripts/configure-containerd.sh
+
+    - name: Configure CRI-O for NVIDIA
+      script: ../../scripts/configure-crio.sh
+
+    - name: Configure kubelet for GPU support
+      script: ../../scripts/kubelet-config.sh
+
+    - name: Apply NVIDIA device plugin DaemonSet
+      kubernetes.core.k8s:
+        state: present
+        src: ../../manifests/daemonsets/nvidia-device-plugin.yaml
+
+    - name: Apply GPU operator DaemonSet
+      kubernetes.core.k8s:
+        state: present
+        src: ../../manifests/daemonsets/gpu-operator.yaml
+
+    - name: Apply containerd configuration
+      copy:
+        src: ../../manifests/runtime/containerd-config.toml
+        dest: /etc/containerd/config.toml
+      notify:
+        - Restart containerd
+
+    - name: Apply CRI-O configuration
+      copy:
+        src: ../../manifests/runtime/crio.conf
+        dest: /etc/crio/crio.conf
+      notify:
+        - Restart CRI-O
+
+  handlers:
+    - name: Restart containerd
+      systemd:
+        name: containerd
+        state: restarted
+
+    - name: Restart CRI-O
+      systemd:
+        name: crio
+        state: restarted
+---

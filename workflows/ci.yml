@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Validate Kubernetes manifests
+        run: |
+          chmod +x ./tests/unit/validate-manifests.sh
+          ./tests/unit/validate-manifests.sh
+
+  test-integration:
+    runs-on: ubuntu-latest
+    needs: validate-manifests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy GPU-enabled pod for integration test
+        run: |
+          kubectl apply -f ./tests/integration/test-gpu-pod.yaml
+          # Add additional commands to verify the deployment if necessary
+          kubectl delete -f ./tests/integration/test-gpu-pod.yaml

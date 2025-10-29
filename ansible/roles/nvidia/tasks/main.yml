@@ -1,0 +1,21 @@
+- name: Install NVIDIA drivers
+  script: scripts/install-nvidia-drivers.sh
+
+- name: Configure containerd
+  script: scripts/configure-containerd.sh
+
+- name: Configure CRI-O
+  script: scripts/configure-crio.sh
+
+- name: Configure kubelet
+  script: scripts/kubelet-config.sh
+
+- name: Deploy NVIDIA device plugin
+  kubernetes:
+    state: present
+    definition: "{{ lookup('file', 'manifests/daemonsets/nvidia-device-plugin.yaml') }}"
+
+- name: Deploy GPU operator
+  kubernetes:
+    state: present
+    definition: "{{ lookup('file', 'manifests/daemonsets/gpu-operator.yaml') }}"

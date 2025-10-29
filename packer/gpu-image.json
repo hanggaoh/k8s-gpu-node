@@ -1,0 +1,54 @@
+{
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "us-west-2",
+      "source_ami": "ami-0abcdef1234567890",
+      "instance_type": "t2.medium",
+      "ssh_username": "ubuntu",
+      "ami_name": "gpu-node-{{timestamp}}",
+      "ami_description": "Amazon Machine Image with NVIDIA GPU drivers and container runtimes"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo apt-get update",
+        "sudo apt-get install -y nvidia-driver-460",
+        "sudo apt-get install -y containerd",
+        "sudo systemctl restart containerd"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "scripts/configure-containerd.sh",
+      "destination": "/tmp/configure-containerd.sh"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "chmod +x /tmp/configure-containerd.sh",
+        "/tmp/configure-containerd.sh"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "scripts/configure-crio.sh",
+      "destination": "/tmp/configure-crio.sh"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "chmod +x /tmp/configure-crio.sh",
+        "/tmp/configure-crio.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "gpu-image-manifest.json"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: gpu-operator
+  namespace: nvidia-gpu-operator
+spec:
+  selector:
+    matchLabels:
+      app: gpu-operator
+  template:
+    metadata:
+      labels:
+        app: gpu-operator
+    spec:
+      containers:
+        - name: gpu-operator
+          image: nvidia/gpu-operator:latest
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          volumeMounts:
+            - name: nvidia-device-plugin
+              mountPath: /var/lib/kubelet/device-plugins
+      volumes:
+        - name: nvidia-device-plugin
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"

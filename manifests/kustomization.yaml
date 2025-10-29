@@ -1,0 +1,5 @@
+resources:
+  - daemonsets/nvidia-device-plugin.yaml
+  - daemonsets/gpu-operator.yaml
+  - runtime/containerd-config.toml
+  - runtime/crio.conf

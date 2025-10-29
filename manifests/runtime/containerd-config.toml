@@ -1,0 +1,17 @@
+[plugins]
+  [plugins."io.containerd.grpc.v1.cri"]
+    sandbox_image = "k8s.gcr.io/pause:3.5"
+    [plugins."io.containerd.grpc.v1.cri".containerd]
+      snapshotter = "overlayfs"
+      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes]
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+          runtime_type = "io.containerd.runc.v1"
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
+          runtime_type = "io.containerd.nvidia.v1"
+  
+[metrics]
+  address = "/run/containerd/containerd.sock"
+  grpc_histogram = true
+
+[debug]
+  level = "info"
