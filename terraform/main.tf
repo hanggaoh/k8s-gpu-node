@@ -10,14 +10,8 @@ resource "aws_instance" "gpu_instance" {
     Name = "K8s-GPU-Node"
   }
 
-  user_data = <<-EOF
-              #!/bin/bash
-              # Install NVIDIA drivers and configure container runtime
-              bash /path/to/scripts/install-nvidia-drivers.sh
-              bash /path/to/scripts/configure-containerd.sh
-              bash /path/to/scripts/configure-crio.sh
-              bash /path/to/scripts/kubelet-config.sh
-              EOF
+  # Embed the bundled bootstrap script (vendor'd scripts) into instance user_data
+  user_data = file("${path.module}/../scripts/bootstrap.sh")
 }
 
 output "instance_id" {
